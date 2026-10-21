@@ -1,0 +1,36 @@
+﻿Categoria;Produto;Descrição;Preço WhatsApp (R$);ID
+Kids;Carne;;12,00;51f76a45-c055-5c1d-be52-2e8b8ac9fd22
+Kids;Carne com queijo;;13,00;ec2c11a7-1ceb-5b16-b34c-88d7af4685c0
+Kids;Frango;;12,00;97f4ead5-73bb-5893-a7c3-43fd6b7cff29
+Kids;Frango com cheddar;;14,00;16fb60df-4147-53a9-a398-27d425424c9a
+Kids;Frango com queijo;;13,00;e5dc01ac-9ecd-5e27-87de-ea06c9d9b44b
+Kids;Queijo;;12,00;ff94adeb-006a-5919-aaec-60b08e1750c7
+Kids;Pizza;queijo, presunto, milho, ervilha e orégano;13,00;c2769561-7573-5543-b050-5ab72382c623
+Kids;Chocolate preto;;12,00;04c89d50-d9fc-5626-ba69-2a4a1ae8799b
+Kids;Chocolate branco;;12,00;3bc99d10-67b2-5ce3-8e0c-eb63d8e86215
+Kids;Dois amores;chocolate preto e chocolate branco;12,00;b8437c84-ddf8-5df9-9d6d-c131d4911205
+Kids;Banana com canela;;12,00;744b8460-7e3d-56e1-8980-c368b076ccd7
+Kids;Romeu e Julieta;queijo e goiabada;12,00;ffdd0d56-acc3-5d57-ae65-340628535d23
+Tradicional;Carne;;19,00;772fefe9-0f15-5b09-a274-4bf4c2f3e5e6
+Tradicional;Carne com queijo;;21,00;1a2e09a6-57e6-5a5b-bf14-55b02ac04e5d
+Tradicional;Frango;;19,00;59d42e93-3bf4-5bf7-8308-5cad9af28316
+Tradicional;Frango com cheddar;;22,00;128f1439-a218-59e7-9fe1-8e53098f1011
+Tradicional;Frango com queijo;;21,00;5a3f72b9-90a3-56d8-8667-cb467cbe006b
+Tradicional;Queijo;;19,00;3dec762b-f797-505e-bc3a-f70e029e3cb7
+Tradicional;Pizza;queijo, presunto, milho, ervilha e orégano;20,00;ea4267b8-2643-5d98-b96b-9b3d81cb0622
+Tradicional;Chocolate preto;;19,00;4a01c4af-298b-534f-ad60-45d0cb75de1a
+Tradicional;Chocolate branco;;19,00;7ef7fc22-d849-5856-879a-89298c79e985
+Tradicional;Dois amores;chocolate preto e chocolate branco;19,00;dfe02a72-edea-5913-831c-156edaccc2a4
+Tradicional;Banana com canela;;19,00;49cbb589-aa99-5948-867f-e190627dfd32
+Tradicional;Romeu e Julieta;queijo e goiabada;19,00;248f1e36-7da9-57c7-980e-518f1639b26b
+Pastelão;Carne;carne moída, tomate, milho, ervilha, pepino, queijo mussarela ralado e ovos cozidos;40,00;0cf6489c-d620-5857-9772-db1f3bce0caf
+Combos;Caixinha de Mini Pastéis (30 un);"30 unidades; sabores e quantidades definidos na montagem.";29,90;1b02f722-1a73-5509-83df-886ea13f944d
+Bebidas;Refrigerante Lata;;7,00;616cff38-990a-581b-b515-c5a5fd46b057
+Bebidas;Coca-Cola 2 Lts;;16,00;d1ee27a4-d676-5958-8d91-8c825b52b9bd
+Bebidas;Pepsi 2 Lts;;13,00;2bf8920c-feb1-5d59-8f4d-5a77aa7fcd2d
+Bebidas;Sukita Laranja 2 Lts;;13,00;3faf30a4-b1b9-5141-9924-e48072198d3a
+Bebidas;Fanta 2 Lts;;14,00;c348dffd-4f24-5d71-aab5-1674877b4561
+Bebidas;Sukita 1 Lt;;9,00;1b04b55f-6bc1-511d-9179-72b5fcf8654e
+Adicionais;Maionese grande;adicional;12,00;32e38ccb-2e5e-59b1-8701-4a4a6e0ba541
+Adicionais;Maionese média;adicional;9,00;129832e3-a2e7-585a-afd8-21a8e04bb5e7
+Adicionais;Maionese pequena;adicional;5,00;0652d354-a4ae-5a02-99b1-f4b1670b484e

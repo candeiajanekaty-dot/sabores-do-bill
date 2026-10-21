@@ -1,0 +1,21 @@
+SABORES DO BILL — IMPORTAÇÃO INICIAL
+
+1. Abra o CSV para conferir os preços extraídos do HTML.
+2. No Supabase, abra SQL Editor > New query.
+3. Cole todo o conteúdo de importar_cardapio_whatsapp.sql e execute.
+4. A consulta final deve listar 32 produtos. A tabela adicionais recebe 3 maioneses.
+
+Conteúdo: 5 categorias, 32 produtos e 3 adicionais. Usa somente preços de balcão/WhatsApp. Não importa valores de iFood/aiqfome, clientes ou histórico de pedidos.
+
+Reexecução: os IDs são fixos para esta importação. Registros com esses IDs são preservados; o script NÃO atualiza preços existentes. Se já houver cadastros equivalentes com outros IDs, poderá haver duplicidade: confira antes de executar. A execução fica em uma transação.
+
+Caixinha: 30 mini pastéis por R$ 29,90, com quatro sabores. A configuração original de sabores foi preservada em configuracoes, chave cardapio_whatsapp_importacao_v1.
+Combos: 3 Kids por R$ 29,90; 2 tradicionais + 1 Kids por R$ 44,90. Essas regras foram documentadas em configuracoes, mas NÃO são aplicadas automaticamente pelo SQL. O backend deverá validar sabores/quantidades e calcular os descontos e totais.
+
+Maioneses: preservadas como adicionais, sem vínculos inventados com os produtos. No PDV original eram itens vendidos separadamente; a interface futura deverá permitir essa venda ou definir os vínculos adequados.
+
+Pastelão: o nome foi separado da lista de ingredientes para facilitar a exibição. Demais nomes e preços preservados. O HTML não possui fotos de produtos vinculadas ao cadastro.
+
+Segurança: o script não altera RLS nem libera acesso administrativo. A configuração de regras permanece privada; o backend deverá disponibilizar ao cardápio apenas o necessário. Nenhuma integração, impressão ou sincronização é ativada por esta importação.
+
+Validação: extração do objeto MENU do HTML; conferência de quantidades, IDs únicos e preços não negativos. SQL preparado para o esquema anexado, sem execução em um banco Supabase nesta sessão.
