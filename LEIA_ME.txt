@@ -1,21 +1,32 @@
-SABORES DO BILL — IMPORTAÇÃO INICIAL
+SABORES DO BILL — GESTÃO E CONEXÃO WHATSAPP
 
-1. Abra o CSV para conferir os preços extraídos do HTML.
-2. No Supabase, abra SQL Editor > New query.
-3. Cole todo o conteúdo de importar_cardapio_whatsapp.sql e execute.
-4. A consulta final deve listar 32 produtos. A tabela adicionais recebe 3 maioneses.
+NOVO: leia primeiro CONFIGURAR_WHATSAPP.txt. Ele descreve o SQL novo, as variáveis privadas, a publicação única e os campos da Meta.
 
-Conteúdo: 5 categorias, 32 produtos e 3 adicionais. Usa somente preços de balcão/WhatsApp. Não importa valores de iFood/aiqfome, clientes ou histórico de pedidos.
+SABORES DO BILL — GESTÃO DO PDV
 
-Reexecução: os IDs são fixos para esta importação. Registros com esses IDs são preservados; o script NÃO atualiza preços existentes. Se já houver cadastros equivalentes com outros IDs, poderá haver duplicidade: confira antes de executar. A execução fica em uma transação.
+INSTALAÇÃO NO SITE EXISTENTE
+1. Execute sql/Atualizar_Gestao_Bill.sql COMPLETO em nova consulta no SQL Editor do Supabase. Resultado esperado: GESTAO_BILL_OK. É um único arquivo com transação, sem apagar produtos ou pedidos.
+2. Na raiz do mesmo repositório sabores-do-bill, Add file → Upload files. Envie a pasta public INTEIRA deste pacote e confirme Commit changes. Substitua os arquivos com os mesmos nomes. Não envie apenas o ZIP nem crie outra public dentro de public. A pasta netlify e os arquivos netlify.toml e package.json também podem acompanhar: preservam a integração anterior.
+3. Confira o novo deploy no Netlify. Se estiver bloqueado, publique a nova versão pelo menu do deploy ou desbloqueie a publicação automática. Diretório publicado: public.
+4. Atualize https://sabores-do-bill.netlify.app/pdv.html e entre com o usuário já cadastrado.
 
-Caixinha: 30 mini pastéis por R$ 29,90, com quatro sabores. A configuração original de sabores foi preservada em configuracoes, chave cardapio_whatsapp_importacao_v1.
-Combos: 3 Kids por R$ 29,90; 2 tradicionais + 1 Kids por R$ 44,90. Essas regras foram documentadas em configuracoes, mas NÃO são aplicadas automaticamente pelo SQL. O backend deverá validar sabores/quantidades e calcular os descontos e totais.
+ABAS
+Pedidos: colunas Recebidos, Confirmados / Em preparo, Prontos e Já saíram. Número, cliente, itens, observações e ENTREGA ou RETIRADA; filtros por nome/número e atendimento. Sem valores e sem pagamento nos cartões da cozinha. Atualização a cada 20 segundos com página visível.
+Dashboard: pedidos do dia, valor dos pedidos, ticket médio, divisão entrega/retirada e etapas. A data seleciona os indicadores. Os valores incluem taxa e descontos e excluem cancelados. São vendas registradas, não dinheiro recebido, lucro ou fechamento de caixa.
+Produtos: cadastro/edição nas categorias existentes; nome, descrição, preço, link https de foto, ativação e disponibilidade. Sem envio de fotos do computador. Produtos desativados preservam o histórico. Maioneses/adicionais continuam no cadastro anterior: esta tela edita a tabela produtos.
+Promoções: ativar/desativar e editar preços dos combos Kids e Família, mantendo suas composições. Outras ofertas podem ser produtos com descrição do combo, categoria Combos. Promoções individuais em Produtos → Editar → preço promocional e Ativar. Sem calendário automático: desligue ao terminar a campanha.
 
-Maioneses: preservadas como adicionais, sem vínculos inventados com os produtos. No PDV original eram itens vendidos separadamente; a interface futura deverá permitir essa venda ou definir os vínculos adequados.
+REGRAS
+O banco recalcula os valores; pedidos antigos conservam os preços da venda. O preço promocional deve ser menor que o normal. Os combos usam os preços vigentes e só aplicam desconto quando há economia, buscando a melhor combinação. A caixinha mantém nome e categoria originais para preservar os 30 sabores.
+Pedidos abertos de datas anteriores continuam na produção; a data seleciona os pedidos que já saíram.
+Recebido → Ver/imprimir comanda → operador confirma que já imprimiu → Confirmado/Em preparo → Pronto (manual).
+Retirada: Pronto → Disponível para retirada → Cliente retirou (concluído).
+Entrega: Pronto → Saiu para entrega → Confirmar entrega (concluído).
+Comanda e detalhes mantêm pagamentos e troco. Confirmar impressão depende do operador: o navegador não comprova saída de papel. Impressão automática e mensagens pelo WhatsApp ainda pendentes. Não há arrastar cartões, exclusão, cancelamento ou estorno novos nesta atualização.
 
-Pastelão: o nome foi separado da lista de ingredientes para facilitar a exibição. Demais nomes e preços preservados. O HTML não possui fotos de produtos vinculadas ao cadastro.
+MERCADO PAGO
+Nenhuma credencial adicionada. As quatro funções foram preservadas. Mantenha MP_MODE=test e PIX_ENABLED=false até retomarmos. Gestão de produtos/promoções/pedidos funciona sem Mercado Pago.
 
-Segurança: o script não altera RLS nem libera acesso administrativo. A configuração de regras permanece privada; o backend deverá disponibilizar ao cardápio apenas o necessário. Nenhuma integração, impressão ou sincronização é ativada por esta importação.
-
-Validação: extração do objeto MENU do HTML; conferência de quantidades, IDs únicos e preços não negativos. SQL preparado para o esquema anexado, sem execução em um banco Supabase nesta sessão.
+VALIDAÇÃO LOCAL
+PostgreSQL compatível: instalação repetida, produtos, preço promocional no servidor, histórico, disponibilidade, combos, transições, autorização e isolamento passaram.
+Node: 8 testes de painel/filtros/dashboard e regressões Pix; scripts verificados. Não executado no Supabase/Netlify reais nem no navegador autenticado: conferir após instalar.

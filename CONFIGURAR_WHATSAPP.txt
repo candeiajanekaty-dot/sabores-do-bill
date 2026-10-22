@@ -1,0 +1,65 @@
+SABORES DO BILL — CONEXÃO DO WHATSAPP (RECEBIMENTO)
+
+O QUE ESTE PACOTE FAZ
+Adiciona o endereço de webhook, verifica a assinatura da Meta e guarda as mensagens recebidas no Supabase. A aba WhatsApp no PDV mostra as últimas 100 mensagens, somente para administradores. Áudios/imagens aparecem pelo tipo, sem baixar anexos. Não armazena o payload bruto nem dados internos da Meta. Repetições da mesma mensagem não criam cópias.
+Ainda NÃO conversa com o cliente, NÃO cria pedidos, NÃO imprime automaticamente e NÃO envia avisos de pronto/entrega. Esses recursos precisam da próxima implementação. O token de acesso do WhatsApp não é necessário para receber mensagens nesta etapa.
+
+1 — BANCO
+O SQL de gestão já executado não precisa ser repetido. Execute o arquivo sql/Conectar_WhatsApp_Bill.sql INTEIRO em uma nova consulta no SQL Editor do MESMO Supabase. Resultado: WHATSAPP_BILL_OK. Não apaga pedidos nem produtos e pode ser executado novamente.
+
+2 — VARIÁVEIS NO NETLIFY
+No projeto sabores-do-bill, abra Project configuration → Environment variables. Adicione as variáveis abaixo para o contexto Production, com disponibilidade para Functions/Runtime (ou todos os escopos, se o plano não permitir escolher). Não use prefixos de variáveis públicas. Não coloque valores privados no GitHub ou em capturas de tela.
+
+WHATSAPP_VERIFY_TOKEN
+Crie uma senha aleatória com pelo menos 32 caracteres. Guarde para copiar exatamente o mesmo valor no campo Verificar token da Meta. Esta senha é sua, não o token de acesso EAA... da Meta. Pode usar o gerador do seu gerenciador de senhas.
+
+WHATSAPP_APP_SECRET
+Segredo DO APLICATIVO Meta Sabores do Bill, ID 1834596014336931. Consulte Configurações do aplicativo → Básico → Chave secreta/Segredo do aplicativo → Mostrar. Não é o token de acesso, nem a senha do Facebook.
+
+WHATSAPP_WABA_ID
+1635738298097886
+
+WHATSAPP_PHONE_NUMBER_ID
+1427852483740948
+
+SUPABASE_SERVICE_ROLE_KEY
+Chave privada service_role do MESMO projeto sepbenhymdholhjvwtdj. Se já estiver corretamente configurada para o Pix, mantenha-a. Use a chave legacy service_role JWT disponível nas configurações de API do Supabase; não confundir com a chave publishable/anon que já está no site. Jamais enviar aqui nem incluir no frontend.
+
+Mantenha MP_MODE=test e PIX_ENABLED=false. Não precisa colocar WhatsApp access token neste pacote. O token compartilhado na conversa deve ser revogado; não é usado pelo código.
+
+3 — UMA PUBLICAÇÃO NO SITE EXISTENTE
+Prepare todas as variáveis e o SQL antes do upload. Extraia o ZIP e envie public, netlify, netlify.toml e package.json para a RAIZ do mesmo repositório GitHub sabores-do-bill em um único commit, substituindo os arquivos. Não criar public/public, netlify/netlify ou um repositório novo. Não enviar o arquivo ZIP no lugar das pastas. SQL, testes e guias não precisam ir ao GitHub.
+Esse pacote já inclui a gestão anterior (produtos, promoções, pedidos e dashboard) e preserva as quatro funções Pix. A nova função é whatsapp-webhook. O diretório publicado continua public.
+Depois do deploy pronto, se a publicação estiver bloqueada, publique o deploy correto no Netlify. Não remova pastas anteriores do repositório. Não publique no Sites.
+
+4 — VOLTAR À TELA DA META QUE JÁ ESTÁ ABERTA
+Somente após a nova função estar publicada:
+URL de callback:
+https://sabores-do-bill.netlify.app/.netlify/functions/whatsapp-webhook
+
+Verificar token:
+O MESMO valor privado que você criou em WHATSAPP_VERIFY_TOKEN.
+
+Deixe o certificado de cliente desativado. Clique Verificar e salvar. Se a Meta apresentar a lista de campos de webhook, assine o campo messages.
+A confirmação de URL só testa o desafio; não comprova o salvamento no banco. Confira o teste abaixo.
+
+5 — TESTAR
+A sua tela da Meta exibe o aviso de que, enquanto o app não estiver publicado, só serão entregues webhooks de teste enviados pelo painel. Portanto, primeiro use o teste do campo messages no painel. Confira se o payload do teste usa a conta e phone_number_id configurados acima: eventos de outro número são intencionalmente ignorados.
+Abra https://sabores-do-bill.netlify.app/pdv.html, entre com o administrador e abra WhatsApp → Atualizar mensagens. O texto recebido deve aparecer. Se o app já estiver habilitado para receber conversas reais, envie um texto novo ao número de teste e confira também no PDV.
+Repetir o mesmo evento não deve duplicar a mensagem.
+Para produção ainda será necessário concluir os requisitos exibidos pela Meta, publicar o aplicativo e confirmar a assinatura da conta no aplicativo. Não adicionar, excluir ou migrar o número oficial do WhatsApp Business nesta etapa.
+
+DIAGNÓSTICO
+Erro ao verificar e salvar: confira a publicação da função e o mesmo WHATSAPP_VERIFY_TOKEN com 32 caracteres ou mais. Não use o token EAA no campo Verificar token.
+Webhook 401: segredo do aplicativo incorreto ou assinatura inválida; não desative essa proteção.
+Webhook 503: faltam variáveis, o SQL não foi executado, ou o Supabase falhou. O endpoint não confirma sucesso sem guardar os dados.
+Sem mensagens na aba: confira o teste messages, conta/número do payload, o aviso de publicação da Meta e a assinatura do app à conta WhatsApp. A aba vazia por si só não comprova a conexão.
+Não usar mp-webhook como callback do WhatsApp: ele é exclusivo de pagamentos.
+
+VALIDAÇÃO DESTA ENTREGA
+Testes locais de assinatura, desafio, banco, permissões e regressões de gestão/Pix. A configuração e o teste remoto dependem do seu painel Netlify/Supabase/Meta; nenhuma credencial privada foi incluída neste ZIP.
+
+Referências oficiais consultadas:
+https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/overview
+https://developers.facebook.com/documentation/business-messaging/whatsapp/reference/whatsapp-business-account/subscribed-apps-api
+https://whatsapp.github.io/WhatsApp-Nodejs-SDK/api-reference/webhooks/start/
