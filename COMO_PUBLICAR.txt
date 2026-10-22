@@ -1,0 +1,18 @@
+Sabores do Bill — Privacidade e exclusão de dados
+
+1. Extraia o ZIP.
+2. No repositório existente sabores-do-bill no GitHub, abra a pasta public.
+3. Use Add file > Upload files. Envie privacidade.html e exclusao-dados.html juntos, de dentro da pasta public deste pacote. Não crie public dentro de public.
+4. Confirme os dois arquivos em um único commit.
+5. Aguarde a publicação no Netlify. Se a publicação automática estiver bloqueada, publique esse commit uma única vez.
+6. Abra os dois links abaixo e confira se mostram as páginas antes de usar na Meta.
+
+URL da Política de Privacidade:
+https://sabores-do-bill.netlify.app/privacidade.html
+
+Em Exclusão de dados do usuário, escolha URL de instruções de exclusão de dados e informe:
+https://sabores-do-bill.netlify.app/exclusao-dados.html
+
+Salve as alterações na Meta e volte à tela de publicação para conferir os requisitos restantes.
+Este pacote contém apenas duas páginas novas. Não substitua o projeto inteiro e não execute SQL para esta etapa.
+As solicitações chegam ao e-mail saboresdobill@gmail.com e precisam ser acompanhadas e atendidas pela equipe.
