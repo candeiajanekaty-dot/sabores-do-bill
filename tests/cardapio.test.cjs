@@ -1,0 +1,11 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const html=fs.readFileSync(__dirname+'/../public/index.html','utf8');
+async function menu(available=true){const els={};const el=id=>els[id]||(els[id]={value:'',innerHTML:'',textContent:'',prepend(){}});
+ const ctx=vm.createContext({console,Number,Math,Object,String,Array,cat:'combos_avulsos',cart:[],labels:{combos_avulsos:'Combos',kit:'Mini pastéis'},descriptions:{},pdvMode:false,billLive:false,billPromoReady:true,billPaymentsReady:false,$:el,esc:s=>String(s).replaceAll('<','&lt;'),money:n=>Number(n/100).toFixed(2),BillPhotos:require('../public/fotos.js'),document:{createElement:()=>({setAttribute(){}})},renderTabs(){},renderCart(){},refreshPromotions:async()=>{},BillDB:{request:async path=>path.startsWith('categorias?')?[{id:'combo-category',nome:'Combos'}]:path==='rpc/bill_cardapio_produtos'?(available?[{id:'kit-uuid',categoria_id:'combo-category',nome:'Caixinha de Mini Pastéis (30 un)',preco:25.9,preco_original:29.9,em_promocao:true}]:[]):path==='rpc/bill_pagamentos_versao'?1:[]}});
+ vm.runInContext(html.slice(html.indexOf('const MENU ='),html.indexOf('</script>',html.indexOf('const MENU ='))),ctx);
+ vm.runInContext(html.slice(html.indexOf('function renderProducts()'),html.indexOf('function detail(it)')),ctx);
+ vm.runInContext(html.slice(html.indexOf('async function loadLiveMenu()'),html.indexOf('const originalReview=review')),ctx);
+ await ctx.loadLiveMenu();return {ctx,el};
+}
+test('caixinha cadastrada em Combos aparece ao cliente com preço promocional e montagem de sabores',async()=>{const {el}=await menu();const result=el('products').innerHTML;assert.match(result,/Caixinha de Mini Pastéis/);assert.match(result,/25\.90/);assert.match(result,/29\.90/);assert.match(result,/data-category="kit"/);assert.match(result,/Montar/);});
+test('caixinha indisponível não aparece e a busca não duplica o mesmo produto',async()=>{const missing=await menu(false);assert.doesNotMatch(missing.el('products').innerHTML,/Montar/);const {ctx,el}=await menu();el('search').value='caixinha';ctx.renderProducts();assert.equal((el('products').innerHTML.match(/data-add="mini30"/g)||[]).length,1);});

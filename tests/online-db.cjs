@@ -1,0 +1,106 @@
+const {PGlite}=require('../../.helpers/pgtest/node_modules/@electric-sql/pglite');
+const fs=require('fs'),cp=require('child_process'),assert=require('node:assert/strict');
+(async()=>{const db=new PGlite();await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role BYPASSRLS;CREATE SCHEMA auth;CREATE TABLE auth.users(id uuid PRIMARY KEY,email text,email_confirmed_at timestamptz);CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;GRANT USAGE ON SCHEMA auth TO authenticated,anon;GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated,anon;`);
+const text=fs.readFileSync('upload/Texto colado.txt','utf8');await db.exec(text.slice(text.indexOf('BEGIN;'),text.indexOf('COMMIT;')+7).replace('CREATE EXTENSION IF NOT EXISTS pgcrypto;',''));
+await db.exec(cp.execFileSync('python3',['-c',"import zipfile;print(zipfile.ZipFile('output/Sabores_do_Bill_importacao_WhatsApp.zip').read('importar_cardapio_whatsapp.sql').decode())"],{encoding:'utf8'}));
+for(const p of ['output/etapa4/01_acesso_pdv.sql','output/Promocoes/01_Controle_Promocoes.sql','output/Promocoes/02_Calculo_Promocoes.sql','mercadopago-integration/sql/01_Pix_e_Pagamentos.sql','mercadopago-integration/sql/02_Controle_Pix.sql','gestao-bill/sql/Atualizar_Gestao_Bill.sql','gestao-bill/sql/Atualizar_Gestao_Bill.sql'])await db.exec(fs.readFileSync(p,'utf8'));
+const admin='11111111-1111-4111-8111-111111111111',other='22222222-2222-4222-8222-222222222222',prod='cccccccc-cccc-4ccc-8ccc-cccccccccccc';await db.query(`INSERT INTO auth.users VALUES ($1,'jkativa.pb@gmail.com',now()),($2,'outro@example.com',now())`,[admin,other]);await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[admin]);const cats=(await db.query('SELECT * FROM public.categorias')).rows,cat=cats.find(x=>x.nome==='Kids').id;await db.exec('SET ROLE authenticated');
+const data={nome:'Novo sabor',preco:15,categoria_id:cat,descricao:'Produto novo',ativo:true,disponivel:true,preco_promocional:10,promocao_ativa:true};
+async function save(d=data,id=prod){return db.query('SELECT public.bill_salvar_produto($1,$2::jsonb)',[id,JSON.stringify(d)]);}
+await save();assert.equal((await db.query('SELECT count(*)::int AS n FROM public.produtos WHERE id=$1',[prod])).rows[0].n,1);await save();assert.equal((await db.query('SELECT preco FROM public.bill_cardapio_produtos() WHERE id=$1',[prod])).rows[0].preco,'10.00');
+let n=0;async function order(type='retirada',qty=1){return (await db.query('SELECT public.bill_registrar_pedido_pdv($1::jsonb,$2::uuid) AS r',[JSON.stringify({nome:'Cliente teste',telefone:'49999999999',tipo_entrega:type,endereco:type==='entrega'?'Rua teste 123':'',taxa_entrega:0,pagamento:'dinheiro',itens:[{id:prod,tipo:'produto',quantidade:qty,preco:0.01}]}),`aaaaaaaa-aaaa-4aaa-8aaa-${String(++n).padStart(12,'0')}`])).rows[0].r;}
+const a=await order();assert.equal(Number(a.total),10);await save({...data,preco:20,preco_promocional:12});assert.equal((await db.query('SELECT preco_unitario FROM public.pedido_itens WHERE pedido_id=$1',[a.id])).rows[0].preco_unitario,'10.00');assert.equal(Number((await order()).total),12);
+await assert.rejects(()=>save({...data,preco_promocional:15}));await assert.rejects(()=>save({...data,nome:'x'}));await assert.rejects(()=>save({...data,imagem_url:'javascript:alert(1)'}));
+await save({...data,disponivel:false});assert.equal((await db.query('SELECT * FROM public.bill_cardapio_produtos() WHERE id=$1',[prod])).rows.length,0);await assert.rejects(()=>order());await save();
+await db.query('SELECT public.bill_editar_combos(true,25,false,45)');assert.equal(Number((await order('retirada',3)).total),25);assert.equal((await db.query('SELECT public.bill_ler_promocoes() AS p')).rows[0].p.kids.preco,25);
+for(const status of ['confirmado','pronto','disponivel_retirada','entregue'])await db.query('SELECT public.bill_alterar_status($1,$2)',[a.id,status]);assert.equal((await db.query('SELECT status FROM public.pedidos WHERE id=$1',[a.id])).rows[0].status,'entregue');await assert.rejects(()=>db.query("SELECT public.bill_alterar_status($1,'confirmado')",[a.id]));
+const b=await order('entrega');for(const status of ['confirmado','pronto','saiu_para_entrega','entregue'])await db.query('SELECT public.bill_alterar_status($1,$2)',[b.id,status]);assert.equal((await db.query('SELECT count(*)::int AS n FROM public.historico_status WHERE pedido_id=$1',[b.id])).rows[0].n,5);
+await db.exec('RESET ROLE');await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[other]);await db.exec('SET ROLE authenticated');await assert.rejects(()=>save());await assert.rejects(()=>db.query('SELECT public.bill_editar_combos(true,25,true,40)'));assert.equal((await db.query('SELECT * FROM public.pedidos')).rows.length,0);await db.exec('RESET ROLE;SET ROLE anon');await assert.rejects(()=>save());assert.equal((await db.query('SELECT * FROM public.bill_cardapio_produtos() WHERE id=$1',[prod])).rows.length,1);
+await db.exec('RESET ROLE');
+await db.exec(fs.readFileSync('gestao-bill/sql/Conectar_WhatsApp_Bill.sql','utf8'));
+const onlineSQL=fs.readFileSync('gestao-bill/sql/Atendimento_Online_Bill.sql','utf8');await db.exec(onlineSQL);await db.exec(onlineSQL);
+await db.query("SELECT set_config('request.jwt.claim.sub','',false)");
+await db.exec('SET ROLE service_role');
+const phone='5546999999999';
+let msgid=0;
+async function greeting(){return db.query('SELECT public.bill_whatsapp_receber($1,$2,$3::jsonb)', ['123','456',JSON.stringify([{message_id:'online.'+(++msgid),telefone:phone,nome:'Cliente',tipo:'text',texto:'CARDÁPIO',enviado_em:new Date().toISOString()}])]);}
+await greeting();await db.exec('RESET ROLE');
+async function getLink(){const row=(await db.query("SELECT texto FROM public.bill_whatsapp_saidas WHERE chave LIKE 'saudacao:%' ORDER BY id DESC LIMIT 1")).rows[0];return row.texto.match(/atendimento=([a-f0-9-]+)\.([a-f0-9-]+)/).slice(1);}
+let [sid,secret]=await getLink();
+const payload={nome:'Cliente modelo',tipo_entrega:'retirada',pagamento:'dinheiro',troco_para:50,itens:[{id:prod,tipo:'produto',quantidade:1,preco:0.01}],taxa_entrega:-99,telefone:'55000000000'};
+await db.exec('SET ROLE service_role');
+async function op(action,data=null,version=null,id=sid,key=secret){return (await db.query('SELECT public.bill_online_operar($1,$2,$3,$4::jsonb,$5) AS r',[id,key,action,data===null?null:JSON.stringify(data),version])).rows[0].r;}
+await assert.rejects(()=>op('consultar',null,null,sid,'wrong'));
+const quoted=await op('cotar',payload);assert.equal(Number(quoted.cotacao.total),10);assert.equal(quoted.estado,'cotado');
+await assert.rejects(()=>op('confirmar',null,quoted.versao+1));
+const done=await op('confirmar',null,quoted.versao);assert.equal(done.antecipado,true);
+const duplicate=await op('confirmar',null,quoted.versao);assert.equal(duplicate.numero,done.numero);
+await db.exec('RESET ROLE');
+const saved=(await db.query('SELECT * FROM public.pedidos WHERE id=$1',[done.id])).rows[0];assert.equal(saved.dados_cliente.telefone,phone);assert.equal(saved.canal,'whatsapp');assert.equal(Number(saved.total),10);assert.equal(Number(saved.valor_troco),40);assert.equal(saved.criado_por,null);
+await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[admin]);await db.exec('SET ROLE authenticated');
+await assert.rejects(()=>db.query("SELECT public.bill_alterar_status($1,'confirmado')",[done.id]));
+await assert.rejects(()=>db.query('SELECT public.bill_online_liberar($1)',[done.id]));
+await db.query('SELECT public.bill_loja_alterar(true)');await db.query('SELECT public.bill_online_liberar($1)',[done.id]);
+await db.query("SELECT public.bill_alterar_status($1,'confirmado')",[done.id]);await db.query("SELECT public.bill_alterar_status($1,'confirmado')",[done.id]);
+await db.query("SELECT public.bill_alterar_status($1,'pronto')",[done.id]);
+assert.equal((await db.query('SELECT status FROM public.pedidos WHERE id=$1',[done.id])).rows[0].status,'disponivel_retirada');
+await db.exec('RESET ROLE');assert.equal((await db.query("SELECT count(*)::int n FROM public.bill_whatsapp_saidas WHERE chave=$1",['status:'+done.id+':confirmado'])).rows[0].n,1);
+await db.query("SELECT set_config('request.jwt.claim.sub','',false)");await db.query("UPDATE public.bill_online SET criado_em=now()-interval '31 seconds'");await db.exec('SET ROLE service_role');await greeting();await db.exec('RESET ROLE');[sid,secret]=await getLink();await db.exec('SET ROLE service_role');
+const delivery={...payload,tipo_entrega:'entrega',endereco:'Rua Modelo 123, Centro, Cidade'};
+const dq=await op('cotar',delivery);assert.equal(dq.estado,'aguardando_taxa');await assert.rejects(()=>op('confirmar',null,dq.versao));
+await db.exec('RESET ROLE');await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[admin]);await db.exec('SET ROLE authenticated');await db.query('SELECT public.bill_online_taxa($1,12)',[sid]);
+await db.exec('RESET ROLE');await db.query("SELECT set_config('request.jwt.claim.sub','',false)");await db.exec('SET ROLE service_role');const fee=await op('consultar');assert.equal(Number(fee.cotacao.total),22);await assert.rejects(()=>op('confirmar',null,dq.versao));
+await db.exec('RESET ROLE');await db.query('UPDATE public.produtos SET preco=16,preco_promocional=11 WHERE id=$1',[prod]);await db.exec('SET ROLE service_role');const changed=await op('confirmar',null,fee.versao);assert.equal(changed.revisar,true);assert.equal(Number(changed.cotacao.total),23);
+const delivered=await op('confirmar',null,changed.versao);assert.equal(delivered.antecipado,false);
+await db.exec('RESET ROLE');await db.query("UPDATE public.bill_whatsapp_saidas SET mensagem_em=now()-interval '2 days' WHERE estado='pendente'");await db.exec('SET ROLE service_role');await db.query("SELECT public.bill_whatsapp_saida('pegar')");await db.exec('RESET ROLE');assert.equal((await db.query("SELECT count(*)::int n FROM public.bill_whatsapp_saidas WHERE estado='pendente'")).rows[0].n,0);
+await db.exec('SET ROLE anon');await assert.rejects(()=>op('consultar'));await assert.rejects(()=>db.query('SELECT * FROM public.bill_online'));assert.equal((await db.query('SELECT aberta FROM public.bill_loja')).rows[0].aberta,true);
+await db.exec('RESET ROLE');await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[other]);await db.exec('SET ROLE authenticated');assert.equal((await db.query('SELECT * FROM public.bill_online')).rows.length,0);await assert.rejects(()=>db.query('SELECT public.bill_loja_alterar(false)'));await assert.rejects(()=>db.query('SELECT public.bill_online_taxa($1,0)',[sid]));await assert.rejects(()=>op('consultar'));
+await db.exec('RESET ROLE');
+await db.query("SELECT public.bill_whatsapp_receber('123','456',$1::jsonb)",[JSON.stringify([{message_id:'optout.test',telefone:phone,nome:'Cliente',tipo:'text',texto:'SAIR',enviado_em:new Date().toISOString()}])]);
+assert.equal((await db.query('SELECT bloqueado FROM bill_privado.whatsapp_preferencias WHERE telefone=$1',[phone])).rows[0].bloqueado,true);
+await db.query("INSERT INTO public.bill_whatsapp_saidas(chave,telefone,texto,mensagem_em) VALUES('test.blocked',$1,'Aviso',now())",[phone]);
+await db.exec('SET ROLE service_role');await db.query("SELECT public.bill_whatsapp_saida('pegar')");await db.exec('RESET ROLE');assert.equal((await db.query("SELECT estado FROM public.bill_whatsapp_saidas WHERE chave='test.blocked'")).rows[0].estado,'cancelada');
+await db.exec('RESET ROLE');await db.exec(onlineSQL);assert.equal((await db.query('SELECT count(*)::int n FROM public.bill_online')).rows[0].n,2);
+
+await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[admin]);await db.exec('SET ROLE authenticated');
+const promoId='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+const basePromo={nome:'Festival modelo',descricao:'Campanha teste',tipo:'percentual',valor:10,minimo:0,quantidade:1,ativo:true,produtos:[prod]};
+async function promo(x){return db.query('SELECT public.bill_promocao_salvar($1,$2::jsonb)',[promoId,JSON.stringify({...basePromo,...x})]);}
+await promo({});assert.equal(Number((await order()).total),9.9);
+const before=(await db.query('SELECT total FROM public.pedidos ORDER BY created_at DESC LIMIT 1')).rows[0].total;
+await promo({tipo:'fixo',valor:5});assert.equal(Number((await order()).total),6);
+await promo({tipo:'combo',valor:15,quantidade:2});assert.equal(Number((await order('retirada',3)).total),25);assert.equal(Number((await order('retirada',4)).total),30);
+await promo({tipo:'percentual',valor:100});assert.equal(Number((await order()).total),0);
+await promo({tipo:'percentual',valor:20,minimo:100});assert.equal(Number((await order()).total),11);
+await promo({tipo:'percentual',valor:20,fim:'2020-01-01T00:00:00Z'});assert.equal(Number((await order()).total),11);
+await promo({tipo:'percentual',valor:20,inicio:'2099-01-01T00:00:00Z'});assert.equal(Number((await order()).total),11);
+await promo({ativo:false});assert.equal(Number((await order()).total),11);
+await assert.rejects(()=>promo({valor:101}));await assert.rejects(()=>promo({tipo:'combo',quantidade:1}));await assert.rejects(()=>promo({produtos:[]}));await assert.rejects(()=>promo({inicio:'2030-01-01',fim:'2020-01-01'}));
+let hours=(await db.query('SELECT horarios FROM public.bill_loja')).rows[0].horarios;
+assert.equal(hours.find(x=>x.dia===0).opcional,true);
+hours=hours.map(x=>x.dia===2?{...x,abre:'10:00',fecha:'18:00'}:x);
+await db.query('SELECT public.bill_horarios_salvar($1::jsonb)',[JSON.stringify(hours)]);
+assert.equal((await db.query('SELECT horarios FROM public.bill_loja')).rows[0].horarios.find(x=>x.dia===2).abre,'10:00');
+await assert.rejects(()=>db.query('SELECT public.bill_horarios_salvar($1::jsonb)',[JSON.stringify(hours.slice(1))]));
+await db.exec('RESET ROLE');
+await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[other]);await db.exec('SET ROLE authenticated');await assert.rejects(()=>promo({}));await assert.rejects(()=>db.query('SELECT public.bill_horarios_salvar($1::jsonb)',[JSON.stringify(hours)]));
+await db.exec('RESET ROLE;SET ROLE anon');await assert.rejects(()=>promo({}));assert.equal((await db.query('SELECT * FROM public.bill_promocoes_ativas()')).rows.length,0);
+await db.exec('RESET ROLE');
+// Campanha também aplicada à cotação do checkout online (sem confiar no navegador).
+await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[admin]);await db.exec('SET ROLE authenticated');await promo({tipo:'percentual',valor:10});await db.exec('RESET ROLE');
+const quoteData={...payload,telefone:phone,pagamento:'dinheiro',cotacao:true,taxa_entrega:0};
+const onlineQuote=(await db.query('SELECT bill_privado.registrar_online_base($1::jsonb,gen_random_uuid()) r',[JSON.stringify(quoteData)])).rows[0].r;assert.equal(Number(onlineQuote.total),9.9);
+console.log('PASSOU campanhas/horários: percentual, fixo, grupo repetível, 100%, mínimo, datas, inatividade, autorização, calendário editável e cálculo online.');
+
+await db.query("UPDATE public.bill_online SET criado_em=now()-interval '31 seconds'");await greeting();[sid,secret]=await getLink();
+await db.query("SELECT set_config('request.jwt.claim.sub','',false)");await db.exec('SET ROLE service_role');
+const customerData={...delivery,nome:'Maria Modelo',salvar_endereco:true};let cq=await op('cotar',customerData);
+await db.exec('RESET ROLE');await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[admin]);await db.exec('SET ROLE authenticated');await db.query('SELECT public.bill_online_taxa($1,10)',[sid]);
+await db.exec('RESET ROLE');await db.query("SELECT set_config('request.jwt.claim.sub','',false)");await db.exec('SET ROLE service_role');cq=await op('consultar');await op('confirmar',null,cq.versao);await db.exec('RESET ROLE');
+assert.equal((await db.query('SELECT endereco FROM public.bill_clientes_whatsapp WHERE telefone=$1',[phone])).rows[0].endereco,customerData.endereco);
+await db.query("UPDATE public.bill_online SET criado_em=now()-interval '31 seconds'");await greeting();[sid,secret]=await getLink();
+assert.match((await db.query("SELECT texto FROM public.bill_whatsapp_saidas ORDER BY id DESC LIMIT 1")).rows[0].texto,/Olá, Maria!/);
+await db.exec('SET ROLE service_role');const returning=await op('consultar');assert.equal(returning.nome,'Maria Modelo');assert.equal(returning.endereco_salvo,customerData.endereco);assert.equal(returning.telefone,phone);
+await db.exec('RESET ROLE;SET ROLE anon');await assert.rejects(()=>db.query('SELECT * FROM public.bill_clientes_whatsapp'));await db.exec('RESET ROLE');
+console.log('PASSOU cliente recorrente: nome confirmado, telefone da origem, endereço salvo com escolha, saudação pelo primeiro nome e isolamento de acesso.');
+await db.close();console.log('PASSOU ONLINE: instalação repetida, link pessoal, cotação, preço atualizado, taxa validada, versão, antecipado, liberação manual, status e avisos sem duplicação, troco, acesso restrito e janela de atendimento.');})().catch(e=>{console.error(e);process.exit(1)});

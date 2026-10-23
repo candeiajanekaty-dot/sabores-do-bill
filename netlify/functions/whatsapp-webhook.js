@@ -1,4 +1,4 @@
-// Somente recebimento: nenhuma conversa é convertida em pedido nesta etapa.
+// Recebimento autenticado e saudação com link pessoal para o cardápio.
 const crypto = require('node:crypto');
 const {rpc, reply} = require('../lib/pix.cjs');
 const MAX_BYTES = 1024 * 1024;
@@ -50,6 +50,7 @@ exports.handler = async event => {
   try {
     // Só responder sucesso após confirmação da transação; a Meta pode repetir em caso de falha.
     await rpc('bill_whatsapp_receber', {p_conta:account, p_numero:phone, p_mensagens:messages});
+    if(process.env.WHATSAPP_AUTOMATION_ENABLED==='true'){try{await require('../lib/whatsapp-send.cjs').flush(1);}catch{/* Fila persistida para execução agendada. */}}
     return reply(200, {received:true});
   } catch {
     return reply(503, {error:'Não foi possível guardar as mensagens. Tente novamente.'});

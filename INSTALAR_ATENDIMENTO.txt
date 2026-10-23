@@ -1,0 +1,113 @@
+SABORES DO BILL — ATENDIMENTO E PEDIDO ONLINE — 22/10/2026
+
+PACOTE PREPARADO E TESTADO LOCALMENTE. NÃO FOI PUBLICADO NA SUA CONTA.
+As 12 fotos recebidas já estão incluídas. Vamos configurar as variáveis privadas e o SQL antes da única publicação combinada.
+A impressão física depende da chegada e identificação da impressora.
+
+O QUE ESTE PACOTE INCLUI
+- Saudação no WhatsApp com link pessoal do cardápio (válido por 24 horas).
+- Produtos, adicionais separados, escolha dos 30 sabores da caixinha e combos ativos.
+- Cliente revisa os valores calculados no banco antes de confirmar.
+- Nome vem preenchido do WhatsApp para conferir/corrigir; o telefone é identificado automaticamente.
+- O nome confirmado fica associado ao mesmo número, para a saudação reconhecer o cliente na próxima visita.
+- Endereço pode ser guardado por escolha do cliente; ele precisa conferir o endereço em cada novo pedido de entrega. Desmarcar a opção em um novo pedido de entrega deixa de guardar o endereço para preenchimento futuro.
+- Crédito e débito na maquininha ou dinheiro com valor para troco.
+- Botão Loja aberta / Loja fechada, manual e salvo no banco; começa fechada.
+- Nova aba Configurações para editar os horários de cada dia e marcar dias eventuais. Os horários aparecem no cardápio e na saudação; não alteram automaticamente o botão.
+- Promoções → + Nova promoção permite nome, descrição, percentual, desconto em reais ou quantidade por preço; produtos participantes, valor mínimo e início/fim opcionais.
+- A campanha de maior desconto concorre com os combos já existentes, sem acumular. Adicionais e taxa de entrega não participam. O preço promocional individual é o preço atual usado como base.
+- Quantidade por preço pode misturar os produtos selecionados e repetir grupos; agrupa primeiro os itens mais baratos. Valores e elegibilidade são conferidos no servidor.
+- Horário habitual informado no cardápio e na saudação: terça a sexta, 8h–17h; sábado, 9h–14h30; alguns domingos, 17h–22h, conforme disponibilidade. O horário é informativo, e o botão continua definindo se a loja atende agora. Não há fechamento nem abertura automáticos.
+- Fechada: aceita pedidos antecipados sem prometer horário.
+- Antecipados destacados no painel; revisão e liberação manual com a loja aberta.
+- Nenhum pedido é confirmado apenas por abrir a loja.
+- Confirmação manual da comanda no PDV enfileira o aviso de pedido confirmado.
+- Marcar pronto enfileira pronto para retirada ou saiu para entrega, conforme a modalidade.
+- Histórico dos avisos: aguardando, aceitos pela Meta, falha ou envio incerto.
+- Dados de telefone vêm do WhatsApp que recebeu o link; não há campo para enviar mensagens para números arbitrários.
+
+O QUE AINDA DEPENDE DE CONFIGURAÇÃO
+- Fotos: incluídas para os sabores correspondentes em Kids e Tradicional e duas fotos para os mini pastéis. Produtos ainda sem foto mantêm o ícone. As fotos originais ficam em public/images/produtos/. Nenhuma foto foi gerada ou alterada. Um link de foto cadastrado no PDV tem prioridade sobre a foto inicial.
+- Taxa por distância: aguardando endereço de origem e faixas. Nesta versão, entrega exige taxa informada pela equipe na aba WhatsApp; o cliente revisa e confirma o total no site. Retirada tem taxa zero.
+- Pix online: permanece desativado até o teste real de pagamento. Esta versão permite fazer o pedido modelo com maquininha ou dinheiro.
+- Impressora: impressão pelo navegador/PDF continua disponível; não há confirmação automática de impressão física. O botão manual já existente continua sendo a liberação para a cozinha.
+- Avisos após a janela do WhatsApp: requerem um modelo aprovado pela Meta, descrito abaixo.
+
+INSTALAÇÃO NO BANCO (APÓS CONFERIRMOS AS FOTOS)
+1. A instalação existente já deve ter produtos, promoções, pagamentos, gestão e recebimento do WhatsApp funcionando, como foi testado.
+2. No SQL Editor do Supabase, abra sql/Atendimento_Online_Bill.sql DESTE PACOTE ATUALIZADO. Ele já inclui horários editáveis, campanhas e cadastro recorrente. Se uma versão anterior desse SQL foi executada, este arquivo completo pode ser reaplicado.
+3. Execute TODO o arquivo, do BEGIN ao SELECT final. Resultado esperado: ATENDIMENTO_ONLINE_BILL_OK.
+4. Não execute novamente os SQLs antigos de recebimento ou gestão por cima deste, pois poderiam substituir as funções estendidas.
+5. A instalação pode ser repetida com este mesmo arquivo e não apaga pedidos, produtos ou mensagens.
+
+CONFIGURAÇÃO PRIVADA NO NETLIFY — ANTES DO ÚNICO DEPLOY
+Mantenha as variáveis existentes de Supabase, Pix e WhatsApp.
+Acrescente:
+WHATSAPP_ACCESS_TOKEN = token de usuário do sistema Employee, válido para o número oficial e com whatsapp_business_messaging.
+WHATSAPP_AUTOMATION_ENABLED = true
+WHATSAPP_STATUS_TEMPLATE = nome exato do modelo aprovado, quando estiver disponível.
+
+O token não deve ser enviado no chat nem colocado no GitHub ou no HTML.
+Como tokens anteriores apareceram em capturas de tela, gere um novo token para produção e revogue os expostos. Salve o novo apenas na variável privada do Netlify.
+
+MODELO PARA AVISOS DE PEDIDOS APÓS A JANELA
+No Gerenciador do WhatsApp, solicitar um modelo de utilidade em Português (Brasil).
+Nome sugerido: bill_atualizacao_pedido
+Corpo sugerido, com duas variáveis numéricas:
+"Atualização do seu pedido {{1}} no Sabores do Bill: {{2}}. Se precisar de ajuda, responda a esta mensagem."
+Exemplos para análise: {{1}} = 123; {{2}} = Pronto para retirada.
+Sem cabeçalho, mídia ou botões nesta versão. O corpo precisa ter exatamente esses dois parâmetros, nessa ordem.
+Depois de aprovado, colocar o nome exato em WHATSAPP_STATUS_TEMPLATE.
+A aprovação e eventual cobrança do envio dependem da Meta. O pacote não cria nem aprova modelos sozinho.
+Sem modelo aprovado, avisos fora da janela ficam sinalizados no painel e não são enviados como texto livre.
+Por segurança, o sistema usa margem de 1 hora no limite de 24 horas.
+Fonte: https://whatsappbusiness.com/policy/ (Business Platform Specific Terms).
+
+PUBLICAÇÃO NO GITHUB / NETLIFY
+- Substituir public/ e netlify/ pelos arquivos deste pacote, na raiz do repositório.
+- Substituir também netlify.toml e package.json na raiz.
+- Não criar uma pasta extra dentro de public.
+- Fazer um único commit com todas as fotos e alterações juntas.
+- No Netlify, publicar uma vez após salvar as variáveis e executar o SQL.
+- Como a publicação automática está bloqueada, o novo deploy pode exigir Publish deploy.
+- A função whatsapp-dispatch deve aparecer como Scheduled na lista de funções. O agendamento também está explícito em netlify.toml.
+- A saudação tenta sair ao receber a mensagem. A fila de avisos também é processada a cada minuto, um aviso por execução; o atraso pode crescer se houver vários pendentes.
+- Envios incertos não são repetidos cegamente: verificar a conversa no WhatsApp para evitar duplicações.
+- Este processamento usa funções e banco; não gera um novo deploy a cada mensagem.
+
+ROTEIRO DO PEDIDO MODELO — APÓS PUBLICAR
+1. No PDV, abrir a loja pelo botão.
+2. De outro telefone, escrever CARDÁPIO no WhatsApp oficial.
+3. Abrir o link pessoal recebido (não compartilhar esse link com outros clientes).
+4. Escolher um pastel e um adicional. Continuar pedido.
+5. Escolher retirada e dinheiro com troco para R$ 50,00, se suficiente.
+6. Conferir o total e clicar Confirmar e enviar pedido.
+7. Conferir no PDV: telefone correto, itens, adicionais, valor e troco. Status Recebido.
+8. Enquanto não houver impressora, conferir a comanda/PDF e usar a confirmação manual já existente quando autorizado pela equipe.
+9. Conferir a mensagem de confirmado no WhatsApp; pode levar um minuto ou mais conforme a fila.
+10. Marcar pronto e conferir o aviso de retirada.
+11. Fechar a loja e solicitar outro link após 30 segundos; repetir como antecipado.
+12. Conferir que não pode confirmar/liberar enquanto fechada; abrir, revisar, liberar e só então confirmar manualmente a comanda.
+13. Entrega: solicitar taxa no site, informar taxa na aba WhatsApp do PDV, voltar ao site e confirmar o total com a entrega.
+
+SEGURANÇA DE OPERAÇÃO
+- Escrever SAIR no WhatsApp desativa os avisos automáticos pendentes desse cliente. CARDÁPIO inicia nova solicitação e permite receber os avisos de novo.
+- Mensagens comuns não geram saudações repetidas durante 30 minutos. CARDÁPIO pode pedir outro link, respeitando 30 segundos de intervalo.
+- O botão Pronto para entrega representa que o pedido saiu para entrega, conforme o fluxo combinado. Use quando ele realmente for sair.
+- Recebimento, confirmação e status do pedido não marcam pagamentos como pagos.
+- Aceita pela Meta não significa entregue no aparelho. A confirmação de entrega real deve ser verificada no teste.
+
+VALIDAÇÃO LOCAL
+36 verificações automatizadas Node: integração, validação, ausência de segredo no cliente, envios, caixa de entrada, painel e finalização.
+Simulação PostgreSQL: instalação repetida, preços e promoções do servidor, disponibilidade, versão da cotação, taxa, troco, bloqueio de liberação fechado, antecipados, status, deduplicação e acesso anon/admin/service_role.
+A ativação e o envio real no número oficial precisam ser testados na conta depois da publicação.
+
+CONFIGURAR SEM NOVA PUBLICAÇÃO
+Depois da ativação, alterações de horários e promoções feitas no PDV ficam no banco. Não é necessário publicar no Netlify para cada alteração.
+Horários: Configurações → marcar os dias, horas e os dias eventuais → Salvar horários.
+Campanhas: Promoções → + Nova promoção → escolher tipo, produtos, datas opcionais e Ativar promoção → Salvar. Editar / ativar permite mudar ou desativar sem apagar o histórico.
+Os clientes verão as alterações na próxima atualização do cardápio; valores são novamente conferidos ao finalizar.
+No próximo pedido do mesmo WhatsApp, o nome vem do cadastro confirmado. O formulário de finalização mostra o telefone de origem como somente leitura. O endereço salvo é sugerido, nunca usado para uma entrega sem o cliente conferir o pedido.
+
+CORREÇÃO DE COMBOS
+A caixinha de 30 minis aparece na categoria Combos, acompanhando o cadastro do PDV, e também no atalho Mini pastéis. O botão Montar mantém a seleção exata dos 30 sabores. O preço promocional da caixinha aparece com o preço original riscado, quando ativado no PDV. A busca mostra apenas um resultado por produto, e caixinhas indisponíveis não são oferecidas.
