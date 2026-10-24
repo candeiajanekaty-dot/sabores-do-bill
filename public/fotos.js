@@ -2,20 +2,20 @@
 (function(root){
  const files={
   'carne':'carne','banana com canela':'banana-com-canela',
-  'carne com queijo':'carne-com-queijo','chocolate branco':'chocolate-branco',
-  'chocolate preto':'chocolate-preto','dois amores':'dois-amores','frango':'frango',
-  'frango com cheddar':'frango-com-cheddar','frango com queijo':'frango-com-queijo',
-  'pizza':'pizza','queijo':'queijo','romeu e julieta':'romeu-e-julieta'
+  'carne com queijo':'Carne_Queijo','chocolate branco':'Chocolate_Branco',
+  'chocolate preto':'Chocolate_Preto','dois amores':'Dois_Amores','frango':'Frango',
+  'frango com cheddar':'Frango_Cheddar','frango com queijo':'Frango_Queijo',
+  'pizza':'Pizza','queijo':'Queijo','romeu e julieta':'Romeu_Julieta'
  };
- const asset=name=>'imagens/produtos/'+name+'.jpeg';
+ const asset=name=>'images/produtos/'+name+'.jpeg';
  function forProduct(name,category,saved){
   if(typeof saved==='string'&&saved.startsWith('https://'))return saved;
-  if(category==='kit')return asset('mini-pasteis');
+  if(category==='kit')return asset('Mini_Pasteis');
   if(!['kids','tradicional'].includes(category))return '';
   const key=String(name||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
-  return key==='carne com queijo'?'imagens/produtos/carne-com-queijo.png':files[key]?asset(files[key]):'';
+  return key==='carne com queijo'?'images/produtos/carne-com-queijo.png':files[key]?asset(files[key]):'';
  }
- const api={forProduct,miniSavory:asset('mini-pasteis'),miniSweet:asset('mini-pasteis-doces')};
+ const api={forProduct,miniSavory:asset('Mini_Pasteis'),miniSweet:asset('Mini_Pasteis_Doce')};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  else root.BillPhotos=api;
 })(globalThis);
