@@ -1,7 +1,8 @@
 // Finalização pública por link pessoal recebido no WhatsApp.
 (()=>{
  if(pdvMode)return;
- let link=new URLSearchParams(location.search).get('atendimento');
+ const params=new URLSearchParams(location.search);
+ let link=params.get('p')||params.get('atendimento');
  if(link){try{sessionStorage.setItem('bill-online-link',link);history.replaceState(null,'',location.pathname+location.hash);}catch{}}
  else try{link=sessionStorage.getItem('bill-online-link');}catch{}
  let last=null,poll=null,inFlight=false;
