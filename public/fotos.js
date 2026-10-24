@@ -7,13 +7,13 @@
   'frango com cheddar':'frango-com-cheddar','frango com queijo':'frango-com-queijo',
   'pizza':'pizza','queijo':'queijo','romeu e julieta':'romeu-e-julieta'
  };
- const asset=name=>'images/produtos/'+name+'.jpeg';
+ const asset=name=>'imagens/produtos/'+name+'.jpeg';
  function forProduct(name,category,saved){
   if(typeof saved==='string'&&saved.startsWith('https://'))return saved;
   if(category==='kit')return asset('mini-pasteis');
   if(!['kids','tradicional'].includes(category))return '';
   const key=String(name||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
-  return key==='carne com queijo'?'images/produtos/carne-com-queijo.png':files[key]?asset(files[key]):'';
+  return key==='carne com queijo'?'imagens/produtos/carne-com-queijo.png':files[key]?asset(files[key]):'';
  }
  const api={forProduct,miniSavory:asset('mini-pasteis'),miniSweet:asset('mini-pasteis-doces')};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
