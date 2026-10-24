@@ -21,3 +21,18 @@ dialog{background:#faf8f0;border:1px solid #d7c594;border-radius:16px;box-shadow
 /* Mesmo fundo e enquadramento do cabeçalho aprovado no cardápio. */
 @media screen{body>header{position:relative;height:216px;min-height:216px;padding:25px max(32px,calc((100vw - 1216px)/2));align-items:flex-start;background:#092616 url('images/cabecalho-pastel.png') center 47%/cover no-repeat}header .brand{gap:28px;align-items:flex-start;font-size:28px}header .brand-logo{width:116px;height:116px}header .brand>span{padding-top:14px}header .brand small{font-size:9px;letter-spacing:1.8px}header .back-link{position:absolute;right:32px;top:124px}}
 @media screen and (max-width:700px){body>header{height:220px;min-height:220px;padding:12px 18px;background:#092616 url('images/cabecalho-pastel.png') 62% center/auto 100% no-repeat}header .brand{gap:12px;font-size:21px}header .brand-logo{width:54px;height:54px}header .brand>span{padding-top:2px}header .brand small{font-size:7px;letter-spacing:1px}header .back-link{top:170px;right:18px}}
+/* Bobina 58 mm: configurar também 58 mm no driver do Windows. */
+@media print{
+ @page{size:auto;margin:2mm}
+ html,body{width:54mm!important;min-width:0!important;margin:0!important;padding:0!important;background:#fff!important}
+ #detail-dialog{position:static!important;width:54mm!important;max-width:54mm!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:visible!important;box-shadow:none!important}
+ #detail-body{font-family:'Courier New',monospace!important;font-size:11px!important;line-height:1.35!important;overflow-wrap:anywhere}
+ #detail-body .eyebrow{font-size:17px!important;letter-spacing:0!important;font-weight:700!important;color:#000!important}
+ #detail-body h2{font-family:inherit!important;font-size:14px!important;line-height:1.25!important;margin:8px 0!important}
+ #detail-body p,#detail-body li{font-size:11px!important;line-height:1.4!important;color:#000!important}
+ #detail-body .receipt-method{padding:7px!important;border:1px solid #000!important;background:transparent!important;border-radius:0!important}
+ #detail-body .detail-items{padding-left:13px!important;margin:8px 0!important}
+ #detail-body .detail-items li{padding:6px 0!important;break-inside:avoid}
+ #detail-body .total-line{font-size:13px!important;border-top:1px dashed #000!important;margin-top:7px!important;padding-top:7px!important;gap:6px!important;display:flex!important;justify-content:space-between!important}
+ #detail-body .no-print,#detail-close{display:none!important}
+}
