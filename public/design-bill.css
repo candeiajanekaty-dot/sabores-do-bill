@@ -37,3 +37,61 @@ main{max-width:1400px;padding:0 32px}.category-nav{border:0;padding:22px 0 18px;
 @media(max-width:700px){.bill-banner:before{background:linear-gradient(90deg,#092616fa 0%,#092616e8 45%,#09261680 75%,#09261650 100%),url('images/produtos/carne-com-queijo.png') right center / auto 120% no-repeat}}
 .bill-banner:before{left:auto;right:0;width:340px;background:url('images/produtos/carne-com-queijo.png') center 42%/cover no-repeat;mask-image:linear-gradient(90deg,transparent,black 55%);opacity:.85}
 @media(max-width:700px){.bill-banner:before{width:190px;background-position:center 40%;mask-image:linear-gradient(90deg,transparent,black 85%);opacity:.65}}
+/* Composição do cabeçalho: pastel mais próximo do centro e integrado ao verde. */
+.bill-banner:before{right:3%;width:44%;background-position:center 42%;background-size:cover;mask-image:linear-gradient(90deg,transparent 0%,#000 30%,#000 92%,transparent 100%);opacity:.9}
+@media(max-width:700px){.bill-banner:before{right:0;width:64%;background-position:center 38%;mask-image:linear-gradient(90deg,transparent 0%,#000 55%,#000 100%);opacity:.72}}
+
+/* Bebidas: imagem inteira, discreta, no mesmo espaço das fotos de produtos. */
+.beverage-product .product-media{object-fit:contain;object-position:center;padding:9px;background:#fff}
+@media(max-width:700px){.beverage-product .product-media{padding:7px}}
+/* Arte exclusiva do cabeçalho: pastel sem prato integrado ao fundo verde. */
+.bill-banner{background:#092616}
+.bill-banner:before{inset:0;width:auto;right:0;background:url('images/cabecalho-pastel.png') center center/cover no-repeat;mask-image:none;opacity:1}
+@media(max-width:700px){.bill-banner:before{inset:0;width:auto;background-position:63% center;background-size:auto 100%;mask-image:none;opacity:1}.bill-banner .menu-intro{background:linear-gradient(90deg,#092616a0,transparent)}.bill-banner .menu-intro h1{text-shadow:0 2px 10px #092616}.bill-banner .menu-intro>p{text-shadow:0 1px 5px #092616}}
+@media(min-width:701px){.bill-banner:before{background:linear-gradient(90deg,#092616 0%,#09261600 70%),url('images/cabecalho-pastel.png') right center/auto 100% no-repeat}}
+@media(min-width:701px){.bill-banner:before{background-position:center,right 7vw center}}
+@media(max-width:700px){.bill-banner:before{background:linear-gradient(90deg,#092616 0%,#092616c0 45%,#09261600 90%),url('images/cabecalho-pastel.png') 40% bottom/auto 85% no-repeat}.bill-banner .menu-intro{background:none}}
+/* Imagem do fundo baseada na referência; textos atuais preservados. */
+.bill-banner:before{inset:0;width:auto;background:url('images/cabecalho-pastel.png') right center/cover no-repeat;opacity:1;mask-image:none}
+@media(max-width:700px){.bill-banner:before{background:linear-gradient(90deg,#092616b0,transparent 85%),url('images/cabecalho-pastel.png') 65% center/auto 100% no-repeat}}
+/* Pastel proporcional e sem ampliação para preencher a faixa. */
+@media(min-width:701px){.bill-banner:before{background:linear-gradient(90deg,#092616 0%,transparent 75%),url('images/cabecalho-pastel.png') right 5vw center/auto 94% no-repeat}}
+@media(max-width:700px){.bill-banner:before{background:linear-gradient(90deg,#092616 0%,#092616b0 35%,transparent 85%),url('images/cabecalho-pastel.png') right bottom/auto 72% no-repeat}.bill-banner .menu-intro{background:none}}
+/* Cabeçalho compacto: reduzir a faixa toda, não apenas a foto. */
+@media(min-width:701px){.bill-banner header{height:76px;padding-top:14px}.bill-banner .brand-logo{width:60px;height:60px}.bill-banner .brand>span{font-size:9px}.bill-banner .menu-intro{padding-top:0;padding-bottom:14px;padding-left:140px}.bill-banner .menu-intro h1{font-size:32px;margin-bottom:7px}.bill-banner .menu-intro>p{font-size:12px}.bill-banner .menu-hours{font-size:9px;margin-top:3px}.bill-banner .cart-top{top:100px;min-height:40px;padding:8px 14px;font-size:11px}.bill-banner:before{background-size:auto,auto 94%}}
+@media(max-width:700px){.bill-banner header{height:72px;padding:12px 18px 0}.bill-banner .brand-logo{width:54px;height:54px}.bill-banner .brand>span{font-size:6px}.bill-banner .menu-intro{min-height:0;padding:10px 18px 44px}.bill-banner .menu-intro h1{font-size:25px;margin-bottom:6px}.bill-banner .menu-intro>p{font-size:10px;max-width:245px;line-height:1.45}.bill-banner .menu-hours{font-size:8px}.bill-banner .cart-top{bottom:-127px;min-height:33px;padding:5px 10px;font-size:9px}.bill-banner:before{background-size:auto,auto 76%}}
+/* Fundo único em toda a faixa: sem bloco, margens ou recorte lateral. */
+.bill-banner{background:#092616 url('images/cabecalho-pastel.png') center center/100% 100% no-repeat}
+.bill-banner:before{display:none}
+@media(max-width:700px){.bill-banner{background:#092616 url('images/cabecalho-pastel.png') center center/100% 100% no-repeat}.bill-banner .menu-intro{background:none}}
+/* Fundo texturizado em toda a faixa e pastel proporcional, sem esticar. */
+.bill-banner{background:#092616 url('images/cabecalho-pastel.png') left center/300% 100% no-repeat}
+.bill-banner:before{display:block;inset:0;width:auto;background:url('images/cabecalho-pastel.png') right center/auto 100% no-repeat;opacity:1;mask-image:linear-gradient(90deg,transparent 45%,#000 75%)}
+@media(max-width:700px){.bill-banner{background:#092616 url('images/cabecalho-pastel.png') left center/300% 100% no-repeat}.bill-banner:before{background-position:right bottom;background-size:auto 78%;mask-image:linear-gradient(90deg,transparent 20%,#000 70%)}}
+/* Cabeçalho como a referência: arte contínua de ponta a ponta. */
+.bill-banner{background:#092616 url('images/cabecalho-pastel.png') center 47%/cover no-repeat}
+.bill-banner:before{display:none!important}
+@media(min-width:701px){
+ .bill-banner{height:216px;min-height:216px;max-height:none}
+ .bill-banner header{height:0;max-width:1280px;padding:0}
+ .bill-banner .brand{position:absolute;left:32px;top:25px;gap:28px;align-items:flex-start}
+ .bill-banner .brand-logo{width:116px;height:116px}
+ .bill-banner .brand>span{font-size:10px;letter-spacing:2px;line-height:1.7;padding-top:12px}
+ .bill-banner .menu-intro{max-width:1280px;padding:86px 240px 15px 176px;min-height:0}
+ .bill-banner .menu-intro h1{font-size:40px;line-height:1.1;margin:0 0 10px;letter-spacing:-.6px}
+ .bill-banner .menu-intro>p{font-size:12px;line-height:1.5;max-width:530px}
+ .bill-banner .menu-hours{font-size:9px;margin-top:4px}
+ .bill-banner .cart-top{top:124px;right:32px;min-height:42px;font-size:11px;padding:8px 14px}
+}
+@media(min-width:701px) and (max-width:1000px){.bill-banner .brand-logo{width:96px;height:96px}.bill-banner .brand{left:22px;gap:18px}.bill-banner .menu-intro{padding-left:136px;padding-right:130px}.bill-banner .menu-intro h1{font-size:33px}.bill-banner .cart-top{right:20px;top:163px}}
+@media(max-width:700px){
+ .bill-banner{height:220px;min-height:220px;background:#092616 url('images/cabecalho-pastel.png') 62% center/auto 100% no-repeat}
+ .bill-banner header{height:72px;padding:12px 18px 0}
+ .bill-banner .brand{position:static;gap:12px;align-items:center}
+ .bill-banner .brand-logo{width:54px;height:54px}
+ .bill-banner .brand>span{font-size:6px;padding-top:0}
+ .bill-banner .menu-intro{padding:12px 18px 40px;min-height:0;background:linear-gradient(90deg,#09261680,transparent)}
+ .bill-banner .menu-intro h1{font-size:25px;margin-bottom:6px}
+ .bill-banner .menu-intro>p{font-size:10px;line-height:1.45;max-width:245px}
+ .bill-banner .cart-top{top:170px;bottom:auto;right:16px;min-height:33px;font-size:9px}
+}

@@ -11,8 +11,9 @@
  function forProduct(name,category,saved){
   if(typeof saved==='string'&&saved.startsWith('https://'))return saved;
   if(category==='kit')return asset('Mini_Pasteis');
-  if(!['kids','tradicional'].includes(category))return '';
   const key=String(name||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+  if(category==='bebidas'){const drinks={'coca-cola lata':'coca-cola-tradicional.jfif','coca-cola zero lata':'coca-cola-zero.jpg','guarana antarctica lata':'guarana-antartica.webp'};return drinks[key]?'images/produtos/'+drinks[key]:'';}
+  if(!['kids','tradicional'].includes(category))return '';
   return key==='carne com queijo'?'images/produtos/carne-com-queijo.png':files[key]?asset(files[key]):'';
  }
  const api={forProduct,miniSavory:asset('Mini_Pasteis'),miniSweet:asset('Mini_Pasteis_Doce')};
