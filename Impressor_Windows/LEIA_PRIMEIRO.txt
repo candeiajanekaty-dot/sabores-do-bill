@@ -1,26 +1,21 @@
-PACOTE ATUAL: bairros + CEP + links + visual aprovado + impressão automática USB 58 mm.
-Substitui todos os ZIPs anteriores desta atualização. Não usa Google Maps nem exige cartão ou chave de mapas.
+AJUSTE DE COMANDA COMPACTA + PIX POR CHAVE
+Este ZIP substitui o pacote anterior de impressão. Inclui todos os arquivos anteriores e o ajuste atual.
 
-ORDEM PARA INSTALAR
-1. Execute Atualizacao_Final_Bill.sql inteiro no Supabase. Pode repetir; o resultado final é IMPRESSAO_AUTOMATICA_BILL_OK. Não recria o banco.
-2. Substitua as pastas/arquivos public e netlify nas mesmas pastas do GitHub. Preserve os outros arquivos. Envie tudo em um único commit e publique uma vez no Netlify.
-3. A pasta Impressor_Windows fica no computador da loja. Não é necessário enviá-la para o GitHub/Netlify. Extraia os dois arquivos juntos, não execute dentro do ZIP.
-4. No Windows, a impressora USB já deve estar instalada e imprimir a página de teste. Defina bobina 58 mm nas preferências do driver. Feche aplicativos que estejam usando a impressora por Bluetooth.
-5. Abra Abrir_Impressor_Bill.cmd. Ele usa o compilador do Microsoft .NET Framework do Windows para preparar o programa localmente, sem baixar nem instalar dependências, e abre Impressor Bill. Se o .NET não estiver disponível ou houver bloqueio, envie a mensagem apresentada; não altere a política de execução nem desative proteções do Windows.
-6. Selecione o nome exato da impressora instalada e clique em Testar impressão. Confirme somente se o papel saiu completo e legível na impressora correta.
-7. Informe e-mail e senha que já usa no PDV. Clique em Ativar automática. As credenciais e os tokens ficam apenas na memória; a senha não é salva em arquivo e não vai para o GitHub. A autenticação é feita diretamente com o Supabase do projeto por HTTPS.
-8. Faça um pedido modelo novo. Com a loja aberta, ele entra na fila, imprime e muda para confirmado depois do envio aceito pelo Windows. Confira o papel e a mensagem no WhatsApp. Use Pausar para interromper a operação.
+1. Execute Atualizacao_Final_Bill.sql inteiro no Supabase (pode repetir). O resultado final deve ser PIX_CHAVE_MANUAL_BILL_OK.
+2. Envie as alterações de public e netlify para as mesmas pastas do GitHub e publique uma só atualização no Netlify.
+3. No computador da loja, PAUSE e FECHE o programa Impressor Bill antes de substituir a pasta Impressor_Windows. Abra novamente Abrir_Impressor_Bill.cmd para compilar a versão compacta.
+4. Se imprimir pelo navegador, use papel 58 mm, escala 100% e DESMARQUE cabeçalhos e rodapés. A página é dimensionada ao conteúdo. O driver também precisa aceitar papel contínuo/altura personalizada: se continuar avançando branco, confira a configuração do driver; não selecione A4.
+5. Faça um pedido modelo e confira margem, leitura e fim do papel antes de usar com pedidos reais. O programa Windows/driver não foi executado no ambiente de preparação.
 
-COMPORTAMENTO
-O programa precisa ficar aberto e o computador ligado/conectado à internet. Não é um serviço iniciado automaticamente com o Windows; abra-o e entre ao iniciar o atendimento. Ele consulta a fila a cada 5 segundos.
-A primeira ativação pega pedidos criados a partir daquele momento. Pedidos recebidos anteriores continuam disponíveis para imprimir manualmente no PDV. Nas próximas ativações, o horário inicial fica preservado para retomar os pedidos pendentes sem repetir os já registrados.
-Loja fechada: não imprime. Antecipado: aguarda revisão/liberação pela equipe. Pix: aguarda pagamento confirmado. Cartão na maquininha e dinheiro podem seguir para a cozinha após impressão. Marcar pronto continua manual.
-O Android continua acompanhando pedidos, sem uma segunda impressão automática. Não faça impressão manual de um pedido enquanto o programa está processando a mesma comanda.
-A confirmação automática significa que o Windows aceitou o trabalho na fila, não uma comprovação física do papel. Impressora sem papel/offline pode reter o trabalho. Confira a saída e a fila do Windows.
-Falha ou reinício durante o envio não gera reimpressão automática: confira Configurações > Impressão automática > Conferir pendências. Após conferir a impressora E a fila do Windows, escolha O papel saiu ou autorize nova tentativa. Essa ação pode duplicar o papel se uma via antiga ainda estiver na fila.
-Se a conexão cair depois de imprimir, o programa tenta registrar/confirmar o mesmo envio, sem enviar papel outra vez. O banco mantém uma reserva única por pedido, inclusive entre computadores.
-Os únicos arquivos locais são o programa, identificador do dispositivo, impressora escolhida, horário inicial e eventual ID/estado do envio pendente, em LocalAppData/SaboresDoBillImpressor. Não apague essa pasta durante operação.
+COMANDA
+Data/hora, cliente, itens e valores usam a mesma margem esquerda. Cliente e ENTREGA/RETIRADA têm o mesmo tamanho. Os demais textos têm tamanho menor, entrelinhas compactas, itens sem marcadores e altura conforme conteúdo. Foram retirados o espaço mínimo antigo de 76 mm do programa e os blocos grandes do navegador. Bordas mantêm a referência do pastel na observação, sem repetir todo o nome na linha do preço.
+O avanço físico final ainda depende do driver e do mecanismo da impressora. Não há comando de corte automático: a MPT-II requer destacar o papel manualmente.
 
-VALIDAÇÃO
-42 testes JavaScript passaram; o banco foi testado para reserva exclusiva, reenvio incerto, reimpressão manual, confirmação idempotente, loja fechada, antecipados, Pix, permissões e instalação repetida. O programa Windows e o driver da impressora precisam do teste físico na loja; não foram executados no ambiente Linux da preparação.
-Nenhuma publicação foi realizada por esta preparação. Custos do Netlify/WhatsApp continuam seguindo as contas existentes.
+PIX DESTA VERSÃO: MANUAL
+O cliente pode selecionar Pix e copiar a chave 46988128067. Não é exigido envio de comprovante.
+Não há consulta automática à conta por essa chave. No PDV, abra a comanda e clique em Conferir crédito do Pix na conta. Confira o crédito efetivo no aplicativo do banco e informe o valor recebido. A liberação fica registrada com usuário, valor e data. Pix pendente não segue para a impressão automática.
+Este pacote não instala integração bancária nova e não confirma pagamento pelo comprovante. Para conferência automática, é preciso gerar cobranças por pedido e concluir a integração de pagamento da conta escolhida (o projeto já tem código de Mercado Pago, com teste real ainda pendente). Não cadastre tokens secretos no GitHub nem envie senhas pelo chat.
+
+VERIFICAÇÃO
+43 testes JavaScript passaram. Banco testado: Pix pendente, valor exato, restrição administrativa, auditoria, repetição segura e impressão liberada somente após conferência. Prévia visual usa dados ilustrativos; prova física ainda necessária.
+Nada foi publicado automaticamente.

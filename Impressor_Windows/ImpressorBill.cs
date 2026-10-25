@@ -96,22 +96,34 @@ public class BillPrinter : Form {
   SaveFile("pendente.json",new{id=id,resultado="enviado"});FlushPending();
   Rpc("bill_impressao_confirmar",new{p_dispositivo=device,p_pedido=id});return "Pedido #"+S(order,"numero")+": aceito pela fila do Windows e confirmado. Confira a saída do papel.";
  }
- static void Add(List<string> list,string value){foreach(string raw in (value??"").Replace("\r","").Split('\n')){string line=raw;while(line.Length>30){int cut=line.LastIndexOf(' ',29);if(cut<10)cut=30;list.Add(line.Substring(0,cut));line=line.Substring(cut).TrimStart();}list.Add(line);}}
+ static void Add(List<string> list,string value){foreach(string raw in (value??"").Replace("\r","").Split('\n')){string line=raw;while(line.Length>36){int cut=line.LastIndexOf(' ',35);if(cut<10)cut=36;list.Add(line.Substring(0,cut));line=line.Substring(cut).TrimStart();}list.Add(line);}}
  List<string> Receipt(Dictionary<string,object> o,object items){
   var lines=new List<string>();var client=D(o.ContainsKey("dados_cliente")?o["dados_cliente"]:null);
-  Add(lines,"SABORES DO BILL");Add(lines,"PEDIDO #"+S(o,"numero"));Add(lines,DateTime.Now.ToString("dd/MM/yyyy HH:mm"));Add(lines,S(o,"tipo_entrega")=="entrega"?"*** ENTREGA ***":"*** RETIRADA ***");Add(lines,"--------------------------------");Add(lines,S(client,"nome"));Add(lines,S(client,"telefone"));Add(lines,S(client,"endereco"));
+  DateTime created;string date=DateTime.TryParse(S(o,"created_at"),out created)?created.ToLocalTime().ToString("dd/MM/yyyy HH:mm"):DateTime.Now.ToString("dd/MM/yyyy HH:mm");Add(lines,date);Add(lines,"PEDIDO #"+S(o,"numero"));Add(lines,"@L@"+S(client,"nome"));Add(lines,S(o,"tipo_entrega")=="entrega"?"@L@ENTREGA":"@L@RETIRADA");Add(lines,S(client,"telefone"));Add(lines,S(client,"endereco"));
   string payment=S(o,"pagamento_metodo"),label=payment=="dinheiro"?"Dinheiro":payment=="pix"?"Pix":payment=="credito_maquininha"?"Crédito na maquininha":payment=="debito_maquininha"?"Débito na maquininha":"Cartão na maquininha";
   Add(lines,"Pagamento: "+label);Add(lines,"Situação: "+(S(o,"pagamento_status")=="pago"?"Pago":"Pendente"));if(payment=="dinheiro"&&N(o,"troco_para")>0){Add(lines,"Troco para: "+Money(N(o,"troco_para")));Add(lines,"Levar troco: "+Money(N(o,"valor_troco")));}
-  Add(lines,"--------------------------------");foreach(object item in (IEnumerable)items){var it=D(item);Add(lines,S(it,"quantidade")+" x "+S(it,"nome_produto"));Add(lines,Money(N(it,"subtotal")));if(S(it,"observacoes")!="")Add(lines,"Obs: "+S(it,"observacoes"));}
-  Add(lines,"--------------------------------");Add(lines,"Produtos: "+Money(N(o,"subtotal")));Add(lines,"Desconto: "+Money(N(o,"valor_desconto")));Add(lines,"Entrega: "+Money(N(o,"taxa_entrega")));Add(lines,"TOTAL: "+Money(N(o,"total")));if(S(o,"observacoes")!="")Add(lines,"OBSERVAÇÕES: "+S(o,"observacoes"));Add(lines," ");Add(lines,"Conferir itens e adicionais");Add(lines," ");return lines;
+  Add(lines,"--------------------------------");foreach(object item in (IEnumerable)items){var it=D(item);string itemName=S(it,"nome_produto");if(itemName.StartsWith("Borda de ")&&itemName.Contains(" — "))itemName="Borda "+itemName.Substring(9).Split(new string[]{" — "},StringSplitOptions.None)[0];Add(lines,S(it,"quantidade")+"x "+itemName+"  "+Money(N(it,"subtotal")));if(S(it,"observacoes")!="")Add(lines,"Obs: "+S(it,"observacoes"));}
+  Add(lines,"--------------------------------");Add(lines,"Produtos: "+Money(N(o,"subtotal")));Add(lines,"Desconto: "+Money(N(o,"valor_desconto")));Add(lines,"Entrega: "+Money(N(o,"taxa_entrega")));Add(lines,"TOTAL: "+Money(N(o,"total")));if(S(o,"observacoes")!="")Add(lines,"OBSERVAÇÕES: "+S(o,"observacoes"));return lines;
  }
  void PrintLines(List<string> lines){
-  using(var document=new PrintDocument())using(var font=new Font("Courier New",8,FontStyle.Regular)){
+  using(var document=new PrintDocument())using(var font=new Font("Courier New",6.5f,FontStyle.Regular))using(var large=new Font("Courier New",8,FontStyle.Bold)){
    document.PrinterSettings.PrinterName=printer;if(!document.PrinterSettings.IsValid)throw new Exception("Impressora inválida");
    document.PrintController=new StandardPrintController();document.DocumentName="Sabores do Bill - Comanda";
-   document.DefaultPageSettings.PaperSize=new PaperSize("Bobina 58mm",228,Math.Max(300,(int)Math.Ceiling((lines.Count*4.2+16)/25.4*100)));
+   var rows=new List<KeyValuePair<string,bool>>();
+   // Quebra a linha pela largura real da fonte e da área imprimível.
+   float bodyStep=2.6f,largeStep=3.25f,needed=4;
+   using(var measure= document.PrinterSettings.CreateMeasurementGraphics()){
+    measure.PageUnit=GraphicsUnit.Millimeter;
+    foreach(string raw in lines){bool big=raw.StartsWith("@L@");string text=big?raw.Substring(3):raw;Font current=big?large:font;
+     while(text.Length>0){int count=text.Length;while(count>1&&measure.MeasureString(text.Substring(0,count),current,1000,StringFormat.GenericTypographic).Width>52)count--;
+      if(count<text.Length){int word=text.LastIndexOf(' ',count-1);if(word>count/2)count=word;}
+      rows.Add(new KeyValuePair<string,bool>(text.Substring(0,count),big));needed+=big?largeStep:bodyStep;text=text.Substring(count).TrimStart();
+     }
+    }
+   }
+   document.DefaultPageSettings.PaperSize=new PaperSize("Bobina 58mm",228,Math.Max(79,(int)Math.Ceiling(needed/25.4*100)));
    document.DefaultPageSettings.Margins=new Margins(0,0,0,0);int index=0;
-   document.PrintPage+=(s,e)=>{e.Graphics.PageUnit=GraphicsUnit.Millimeter;float y=2,limit=e.PageBounds.Height*25.4f/100-4;while(index<lines.Count&&y+4.2f<=limit){e.Graphics.DrawString(lines[index++],font,Brushes.Black,2,y);y+=4.2f;}e.HasMorePages=index<lines.Count;};
+   document.PrintPage+=(s,e)=>{e.Graphics.PageUnit=GraphicsUnit.Millimeter;float y=1.5f,limit=e.PageBounds.Height*25.4f/100-1.5f;while(index<rows.Count){var row=rows[index];float step=row.Value?largeStep:bodyStep;if(y+step>limit)break;e.Graphics.DrawString(row.Key,row.Value?large:font,Brushes.Black,2,y,StringFormat.GenericTypographic);y+=step;index++;}e.HasMorePages=index<rows.Count;};
    document.Print();
   }
  }
