@@ -1,0 +1,24 @@
+/* Mesma margem para data, cliente, itens e totais. */
+.bill-receipt{box-sizing:border-box;width:54mm;max-width:54mm;margin:0;padding:0;color:#000;background:#fff;font:9px/1.14 'Courier New',monospace;letter-spacing:0;text-align:left;overflow-wrap:anywhere}
+.bill-receipt *{box-sizing:border-box;font-family:inherit;color:#000;letter-spacing:0}
+.bill-receipt .receipt-date{margin:0 0 1mm;font-size:9px}
+.bill-receipt .eyebrow{font-size:9px;font-weight:bold;letter-spacing:0;margin:0 0 .6mm}
+.bill-receipt .receipt-client,.bill-receipt .receipt-kind{font-size:12px;line-height:1.12;font-weight:700;margin:0 0 .6mm;letter-spacing:0}
+.bill-receipt .receipt-address{white-space:normal;margin-top:.6mm}
+.bill-receipt .receipt-divider{border-top:1px dashed #000;margin:1mm 0}
+.bill-receipt .receipt-row{display:flex;justify-content:space-between;align-items:baseline;gap:1.2mm;margin:0;padding:0;line-height:1.14;font-size:9px}
+.bill-receipt .receipt-row>span:first-child{min-width:0;flex:1}.bill-receipt .receipt-row>span:last-child{white-space:nowrap;flex:none}
+.bill-receipt .receipt-item{font-weight:bold;margin:.6mm 0 0;break-inside:avoid}
+.bill-receipt .receipt-item-note{margin:0 0 .5mm;padding:0;font-size:9px}
+.bill-receipt .receipt-total{font-weight:bold;margin-top:.8mm}.bill-receipt .receipt-observation{margin-top:1mm;white-space:pre-wrap}
+@media print{
+ @page{margin:2mm}
+ html,body{width:54mm!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important}
+ #detail-dialog{width:54mm!important;max-width:54mm!important;height:auto!important;min-height:0!important;padding:0!important;margin:0!important}
+ #detail-body .bill-receipt{width:54mm!important;font:9px/1.14 'Courier New',monospace!important}
+ #detail-body .bill-receipt .eyebrow{font-size:9px!important;letter-spacing:0!important;margin:0 0 .6mm!important}
+ #detail-body .bill-receipt h2.receipt-client,#detail-body .bill-receipt .receipt-kind{font-size:12px!important;line-height:1.12!important;margin:0 0 .6mm!important;letter-spacing:0!important}
+ #detail-body .bill-receipt .receipt-row{font-size:9px!important;line-height:1.14!important}
+ #detail-body .bill-receipt .receipt-total{font-size:9px!important;border:0!important;padding:0!important;gap:1.2mm!important;margin-top:.8mm!important}
+ .no-print{display:none!important}
+}
